@@ -40,7 +40,7 @@ git clone https://github.com/BhumikDhandhukia/Robusa-.git
 
 1. Start the Expo server:
    ```bash
-   expo start
+   npm start
    ```
 
 2. Follow the instructions to run the Expo app using Expo Go on your device.
