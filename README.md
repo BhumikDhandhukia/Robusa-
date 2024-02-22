@@ -30,8 +30,7 @@ git clone https://github.com/BhumikDhandhukia/Robusa-.git
    ```javascript
    const API_URL = 'YOUR_BACKEND_API_URL';
    export default {
-  API_URL,
-};
+   API_URL,};
 
    ```
 
