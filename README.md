@@ -5,6 +5,7 @@ Welcome to Robusa! Robusa is a project consisting of a frontend built in React N
 ## Cloning the Repository
 
 To clone this repository, run the following command:
+```bash
 git clone https://github.com/BhumikDhandhukia/Robusa-.git
 
 
