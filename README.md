@@ -25,10 +25,15 @@ git clone https://github.com/BhumikDhandhukia/Robusa-.git
 
 1. Create a `config.js` file in the `Robusa` directory.
    
-2. Add the following content to `config.js`, replacing `YOUR_BACKEND_API_URL` with the URL of your backend API (e.g., `http://localhost:3000` if running locally):
+2. Add the following content to `config.js`, replacing `YOUR_BACKEND_API_URL` with the URL of your backend API (e.g., `http://localhost:3000` if running locally, If acccesing on same wifi Your IP Address:3000):
 
    ```javascript
-   export const API_URL = 'YOUR_BACKEND_API_URL';
+   const API_URL = 'YOUR_BACKEND_API_URL';
+
+export default {
+  API_URL,
+};
+
    ```
 
 ### Running the App
