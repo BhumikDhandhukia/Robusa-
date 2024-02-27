@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
 import config from '../config';
 
+
 // Define the LoginScreen component
 const LoginScreen = () => {
   // State variables for email, password, and loading status
@@ -36,6 +37,7 @@ const LoginScreen = () => {
       if (response.ok) {
         // Save token in AsyncStorage
         await AsyncStorage.setItem('token', jsonData.token);
+       
   
         // Navigate to DevicesScreen
         navigation.navigate('Devices');
@@ -75,7 +77,7 @@ const LoginScreen = () => {
 
       // Check if response is ok
       if (response.ok) {
-        // Navigate to DevicesScreen if user is logged in
+        
         navigation.navigate('Devices');
       }
     } catch (error) {

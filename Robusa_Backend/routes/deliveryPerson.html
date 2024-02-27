@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Notification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0; /* Background color for the body */
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .icon {
+            font-size: 50px;
+            color: #009688; /* Color for the icon */
+            margin-bottom: 20px;
+        }
+
+        .message {
+            font-size: 18px;
+            color: #333; /* Color for the message text */
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .instruction {
+            font-size: 16px;
+            color: #555; /* Color for the instruction text */
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            width: calc(100% - 20px);
+            margin-bottom: 10px;
+        }
+
+        input[type="submit"] {
+            padding: 10px;
+            width: calc(100% - 20px);
+            background-color: #009688; /* Background color for the submit button */
+            color: #fff; /* Text color for the submit button */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">🚚</div>
+        <div class="message">
+            <p>We have informed the owner of your arrival.</p>
+            <p>If provided with the pin code, you may deliver the product in the box or call the owner and ask to open.</p>
+            <p>Please follow these instructions carefully:</p>
+        </div>
+        <div class="instruction">
+            <p>1. Enter the PIN code provided by the owner in the input field below.</p>
+            <p>2. After entering the correct PIN code, press "Submit" to open the box.</p>
+            <p>3. Once the box is open, deliver the product inside.</p>
+            <p>4. Close the box securely and press the door to confirm that it is locked.</p>
+            <p>5. Remember, the box will automatically close in 10 seconds if you don't pull the door.</p>
+            <p>6. You can open the box any number of times within 3 minutes.</p>
+        </div>
+        <form id="pinForm" action="http://192.168.1.204:3000/deliveryperson/pin" method="post">
+            <input type="hidden" id="uniqueId" name="uniqueId" value="">
+            <input type="text" id="pincode" name="pincode" placeholder="Enter Pin Code" required>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+
+    <script>
+        // JavaScript code to set the uniqueId value in the form
+        window.onload = function() {
+            const pinForm = document.getElementById('pinForm');
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const uniqueId = urlParams.get('uniqueId');
+            document.getElementById('uniqueId').value = uniqueId;
+
+            // Add event listener for form submission
+            pinForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                
+                const pincode = document.getElementById('pincode').value;
+                
+                try {
+                    // Send a POST request with pincode and uniqueId
+                    const response = await fetch('http://192.168.1.204:3000/deliveryperson/pin', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ pincode, uniqueId })
+                    });
+                    const responseData = await response.text();
+                    console.log(responseData); // Log the response from the backend
+                    alert(responseData); // Show a confirmation message to the user
+                } catch (error) {
+                    console.error('Error sending pin code:', error);
+                    alert('An error occurred. Please try again.'); // Show an error message to the user
+                }
+            });
+        };
+    </script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, Button } from 'react-native';
 import CircularProgressComponent from './CircularProgressComponent';
 import config from '../config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -21,10 +21,10 @@ const LockSys = ({ route }) => {
   const [press, setPress] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
   const [communicationApi, setCommunicationApi] = useState();
+  const [pin, setPin] = useState('');
 
   useEffect(() => {
-    
-    fetchCommunicationApi()
+    fetchCommunicationApi();
     if (showProgress) {
       const timeoutId = setTimeout(() => {
         setShowProgress(false);
@@ -48,67 +48,42 @@ const LockSys = ({ route }) => {
       );
       setCommunicationApi(response.data.communicationApi);
     } catch (error) {
-      navigation.navigate('Devices')
-      alert('Power Device and wait for it to register itself')
+      navigation.navigate('Devices');
+      alert('Power Device and wait for it to register itself');
       console.log(error);
     }
   };
 
-  const sendRequest = async (url, action) => {
+  const generatePin = async () => {
     try {
-      const response =  await fetch(url, {
-        method: 'GET',
-      },);
-      console.log("HEKKI:",response)
-      console.log(response)
-      if (response.ok) {
-        console.log(response)
-        const responseData = await response.text();
-        setApiResponse(responseData);
-        setOnline(true);
-        if (responseData === 'ON' && action === 'LOCK') {
-          setButtonColor('red');
-          setStatus('Currently Locked');
-        } else if (responseData === 'OFF' && action === 'UNLOCK') {
-          setButtonColor('green');
-          setStatus('Currently Unlocked');
-        } else {
-          setButtonColor('yellow');
-          setOnline(false)
-          setStatus('Offline');
+      const token = await AsyncStorage.getItem('token');
+      const response = await axios.post(
+        config.API_URL + `/auth/devices/generatePin`,
+        { uniqueId: uniqueId },
+        {
+          headers: {
+            Authorization: token,
+          },
         }
-      } else {
-        console.error('Request failed');
-        setButtonColor('yellow');
-        setOnline(false)
-        setStatus('Offline');
-      }
+      );
+      setPin(response.data.pin);
     } catch (error) {
-      console.error('Error during request:', error);
-      setOnline(false)
-      setButtonColor('yellow');
-      setStatus('Offline');
+      console.error('Error generating PIN:', error);
+      alert('Error generating PIN. Please try again.');
     }
   };
 
   const handlePressIn = async () => {
-    
-     
     isButtonHeldRef.current = true;
-    buttonColor === 'green'
-      ? setStatus('Hold to Lock')
-      : setStatus('Hold to Unlock');
+    buttonColor === 'green' ? setStatus('Hold to Lock') : setStatus('Hold to Unlock');
     setPress(true);
-
-    setShowProgress(true); // Show the CircularProgressComponent when the button is pressed
+    setShowProgress(true);
 
     timerIdRef.current = setTimeout(() => {
       if (isButtonHeldRef.current) {
         console.log(communicationApi + '/1');
         const apiUrl =
-          buttonColor === 'green'
-            ? communicationApi +'/1'
-            : communicationApi +'/2';
+          buttonColor === 'green' ? communicationApi + '/1' : communicationApi + '/2';
 
         const action = buttonColor === 'green' ? 'LOCK' : 'UNLOCK';
 
@@ -123,16 +98,51 @@ const LockSys = ({ route }) => {
 
     setPress(false);
 
-    setShowProgress(false); // Hide the CircularProgressComponent when the button is released
+    setShowProgress(false);
     if (online === false) {
       setStatus('Offline');
     }
   };
 
+  const sendRequest = async (url, action) => {
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+      });
+      console.log('HEKKI:', response);
+      console.log(response);
+      if (response.ok) {
+        console.log(response);
+        const responseData = await response.text();
+        setApiResponse(responseData);
+        setOnline(true);
+        if (responseData === 'ON' && action === 'LOCK') {
+          setButtonColor('red');
+          setStatus('Currently Locked');
+        } else if (responseData === 'OFF' && action === 'UNLOCK') {
+          setButtonColor('green');
+          setStatus('Currently Unlocked');
+        } else {
+          setButtonColor('yellow');
+          setOnline(false);
+          setStatus('Offline');
+        }
+      } else {
+        console.error('Request failed');
+        setButtonColor('yellow');
+        setOnline(false);
+        setStatus('Offline');
+      }
+    } catch (error) {
+      console.error('Error during request:', error);
+      setOnline(false);
+      setButtonColor('yellow');
+      setStatus('Offline');
+    }
+  };
+
   const handleCardClick = () => {
-    // Add your logic here to handle the click event
     console.log('Card clicked');
-    // For example, you can navigate to another screen, perform an action, etc.
   };
 
   return (
@@ -140,10 +150,7 @@ const LockSys = ({ route }) => {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {showProgress && (
           <View style={styles.circularProgressContainer}>
-            <CircularProgressComponent
-              percentage={100}
-              buttonColor={buttonColor}
-            />
+            <CircularProgressComponent percentage={100} buttonColor={buttonColor} />
           </View>
         )}
 
@@ -163,11 +170,15 @@ const LockSys = ({ route }) => {
             style={styles.image}
           />
         </TouchableOpacity>
+      
       </ScrollView>
 
-      {/* Card View */}
       <TouchableOpacity onPress={handleCardClick} style={styles.cardContainer}>
-        <Text>This is a clickable card view</Text>
+      <Button title="Generate PIN" onPress={generatePin} />
+      <Text style={styles.pinText}>{pin ? `PIN VALID FOR THREE MINUTES: ${pin}` : ''}</Text>
+
+        
+        
       </TouchableOpacity>
     </View>
   );
@@ -178,7 +189,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    
   },
   scrollContainer: {
     flexGrow: 1,
@@ -187,9 +197,9 @@ const styles = StyleSheet.create({
   },
   circularProgressContainer: {
     position: 'absolute',
-    top: '50%', // You can adjust these values based on your desired position
+    top: '50%',
     left: '50%',
-    transform: [{ translateX: -150 }, { translateY: -110 }], // Adjust this to center the CircularProgressComponent
+    transform: [{ translateX: -150 }, { translateY: -110 }],
   },
   circleButton: {
     position: 'relative',
@@ -223,13 +233,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   cardContainer: {
-    height: '40%', // Occupy bottom 40% of the screen
-    width: '90%', // Reduce the width to leave some border
+    height: '40%',
+    width: '90%',
     backgroundColor: 'lightgrey',
-    borderRadius: 20, // Rounded corners
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20, // Add margin to create space between the card and other components
+    marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -239,7 +249,13 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
+  pinText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginTop: 10, // Add some spacing between the button and the PIN text
+    color: 'blue', // Match the color with the theme
+  },
+  
 });
 
 export default LockSys;
-

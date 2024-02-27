@@ -47,6 +47,9 @@ app.use((req, res, next) => {
 
 const authRouter = require('./routes/auth');
 const registerDeviceRouter = require('./routes/registerdevice');
+const notificationsRouter = require('./routes/notificationsRouter');
+const deliveryPersonRouter = require('./routes/deliveryPersonRouter');
+
 
 
 const User = require('./models/userModel'); // Import the user model
@@ -54,6 +57,9 @@ const User = require('./models/userModel'); // Import the user model
 // Use the router for all routes starting with '/auth'
 app.use('/registerdevice', registerDeviceRouter);
 app.use('/auth', authRouter);
+app.use('/notifications', notificationsRouter);
+app.use('/deliveryperson', deliveryPersonRouter);
+
 
 async function startServer() {
   try {

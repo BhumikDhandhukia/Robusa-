@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Dimensions, Alert } from 'react-native';
-
+import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import config from '../config';
+import { NotificationSetup } from './RobusaNotify';
 
 const DevicesScreen = ({ route }) => {
   const [devices, setDevices] = useState([]);
@@ -16,6 +17,7 @@ const DevicesScreen = ({ route }) => {
   const fetchDevices = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
+      NotificationSetup(token);
       const response = await axios.get(
         config.API_URL + `/auth/devices/getdevices`,
         {
@@ -43,7 +45,6 @@ const DevicesScreen = ({ route }) => {
 
   const handleDeleteDevice = async (uniqueId) => {
     try {
-      
       const token = await AsyncStorage.getItem('token');
       const response = await axios.post(
         config.API_URL + '/auth/devices/delete',
@@ -51,7 +52,7 @@ const DevicesScreen = ({ route }) => {
         {
           headers: {
             Authorization: token,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
           },
         }
       );
@@ -64,11 +65,9 @@ const DevicesScreen = ({ route }) => {
 
   const handleDevicePress = (item) => {
     if (item.deviceType === 'Lock') {
-      
-      
-      navigation.navigate('LockSys', {uniqueId:item.uniqueId});
+      navigation.navigate('LockSys', { uniqueId: item.uniqueId });
     } else {
-      alert("Device Not Functional")
+      alert('Device Not Functional');
     }
   };
 
@@ -96,16 +95,26 @@ const DevicesScreen = ({ route }) => {
         data={devices}
         keyExtractor={(item) => item.uniqueId}
         renderItem={({ item }) => (
-          <TouchableOpacity style={[styles.deviceCard, { width: screenWidth - 32, height: screenHeight * 0.3 }]} onPress={() => handleDevicePress(item)}>
+          <TouchableOpacity
+            style={[styles.deviceCard, { width: screenWidth - 32 }]}
+            onPress={() => handleDevicePress(item)}
+          >
             <View style={styles.deviceCardContent}>
-              <Text style={styles.deviceName}>{item.deviceName}</Text>
-              <Text style={styles.deviceType}>{item.deviceType}</Text>
-              <Text style={styles.deviceType}>{item.status}</Text>
-              
+              <View style={styles.deviceHeader}>
+                <Text style={styles.deviceName}>{item.deviceName}</Text>
+                <TouchableOpacity onPress={() => confirmDeleteDevice(item.uniqueId)}>
+                  <Ionicons name="trash-bin" size={24} color="red" />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.deviceInfo}>
+                <Ionicons name={item.deviceType === 'Lock' ? 'lock-closed' : 'md-phone-portrait'} size={24} color="#666" />
+                <Text style={styles.deviceType}>{item.deviceType}</Text>
+              </View>
+              <View style={styles.deviceInfo}>
+                <Ionicons name={item.status === 'Active' ? 'md-checkmark-circle' : 'md-close-circle'} size={24} color={item.status === 'Active' ? 'green' : 'red'} />
+                <Text style={[styles.deviceStatus, { color: item.status === 'Active' ? 'green' : 'red' }]}>{item.status}</Text>
+              </View>
             </View>
-            <TouchableOpacity style={styles.deleteButton} onPress={() => confirmDeleteDevice(item.uniqueId)}>
-              <Text style={styles.deleteButtonText}>X</Text>
-            </TouchableOpacity>
           </TouchableOpacity>
         )}
         ListEmptyComponent={<Text>No devices found</Text>}
@@ -119,49 +128,68 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    padding: 16,
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 20,
+    color: '#333',
   },
   deviceCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
+    backgroundColor: '#fff',
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#dddddd',
-    marginBottom: 10,
+    borderColor: '#ddd',
+    marginBottom: 20,
     elevation: 3,
-    position: 'relative',
   },
   deviceCardContent: {
     padding: 16,
   },
+  deviceHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
   deviceName: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#333',
+  },
+  deviceInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
   },
   deviceType: {
     fontSize: 16,
+    color: '#666',
+    marginLeft: 8,
+  },
+  deviceStatus: {
+    fontSize: 16,
+    marginLeft: 8,
   },
   deleteButton: {
-    position: 'absolute',
-    bottom: 10,
-    right: 10,
     backgroundColor: 'red',
-    width: 30,
-    height: 30,
+    width: 40,
+    height: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 5,
+    borderRadius: 20,
+    marginLeft: 10,
   },
   deleteButtonText: {
-    color: 'white',
+    color: '#fff',
     fontWeight: 'bold',
+    fontSize: 18,
   },
   cameraLink: {
     fontSize: 16,
-    color: 'blue',
+    color: '#007bff',
     marginBottom: 10,
   },
 });

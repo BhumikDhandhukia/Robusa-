@@ -33,6 +33,7 @@ router.post('/addnew', async (req, res) => {
     console.log(deviceName)
 
     // Parse scanned data
+    console.log(scannedData.data)
     const { uniqueId, devicetype } = JSON.parse(JSON.parse(JSON.stringify(scannedData.data)));
 
     // Check if uniqueId is already associated with another device across all users
@@ -129,5 +130,33 @@ router.post('/getCommunicationApi',async(req,res)=>{
 
 
 
+
+module.exports = router;
+// Route to generate and save PIN for a device
+router.post('/generatePin', authMiddleware, async (req, res) => {
+  try {
+    const { uniqueId } = req.body;
+
+    // Find the device with the given uniqueId
+    const device = req.user.devices.find(device => device.uniqueId === uniqueId);
+    if (!device) {
+      return res.status(404).json({ message: 'Device not found' });
+    }
+
+    // Generate a PIN
+    const pin = Math.floor(1000 + Math.random() * 9000); // Generate a 4-digit PIN
+
+    // Save the PIN and pinCreatedAt in the device object
+    device.pin = pin;
+    device.pinCreatedAt = new Date();
+    await req.user.save();
+
+    // Send the PIN back to the user as a response
+    res.status(201).json({ message: 'PIN generated and saved successfully', pin });
+  } catch (error) {
+    console.error('Error generating PIN:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
 
 module.exports = router;

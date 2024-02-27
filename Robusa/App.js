@@ -8,11 +8,14 @@ import CameraComponent from './components/CameraComponent';
 import LockSys from './components/LockSys';
 import SignupScreen from './components/SignupScreen';
 
+
 const Stack = createStackNavigator();
 
 const App = () => {
   return (
+    
     <NavigationContainer>
+      
       <Stack.Navigator initialRouteName="Devices">
         <Stack.Screen name="Devices" component={DevicesScreen} options={{ headerLeft: null }} />
       
