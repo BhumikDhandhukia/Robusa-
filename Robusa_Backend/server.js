@@ -7,17 +7,9 @@ const app = express();
 const port = 3000;
 
 require('dotenv').config()
-var admin = require("firebase-admin");
-
-var serviceAccount = require("./robusa-b94d3-firebase-adminsdk-1kxip-fac3ec6f3b.json");
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-});
 
 
-// 'mongodb+srv://Bhumik:kkkWVvwEXLXYuXJW@cluster0.kr6n4za.mongodb.net/'
-// MongoDB Atlas connection URI
+
 const mongoURI = process.env.MONGO_URI  ;
 
 // Connect to MongoDB Atlas on app startup
